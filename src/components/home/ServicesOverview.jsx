@@ -1,12 +1,9 @@
-import { Calendar, ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { base44 } from "@/api/base44Client";
 import Reveal from "@/components/Reveal";
+import SectionHeader from "@/components/SectionHeader";
+import ServiceCard from "@/components/ServiceCard";
 import CTAButton from "@/components/CTAButton";
-import Counter from "@/components/Counter";
-import PerformanceChart from "@/components/charts/PerformanceChart";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { parseJSON } from "@/hooks/useCMSPage";
+import { FALLBACK_SERVICES } from "@/lib/siteData";
 import { HOME_DEFAULTS } from "@/lib/sitePageDefaults";
-export default function CredibilityCTA({ content = HOME_DEFAULTS }) {
-  const { settings } = useSiteSettings(); const platforms=parseJSON(content.credibility_platforms, HOME_DEFAULTS.credibility_platforms);
-  return <section className="py-20 lg:py-28"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center"><Reveal><div className="relative bg-slate-950 rounded-3xl p-8 lg:p-10 overflow-hidden"><div className="absolute -top-20 -right-20 w-72 h-72 bg-orange-500/20 rounded-full blur-3xl"/><div className="absolute -bottom-20 -left-20 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl"/><div className="relative"><span className="text-sm font-semibold text-orange-400 uppercase tracking-wider">Featured Metric</span><p className="mt-3 text-5xl lg:text-6xl font-extrabold font-display text-white"><Counter value={settings.monthly_ad_spend}/></p><p className="mt-2 text-lg text-slate-300">{content.credibility_metric_label}</p><div className="mt-8"><PerformanceChart color="#FF4D00" color2="#EC4899" height={160}/></div><div className="mt-6 flex flex-wrap gap-2">{platforms.map(p=><span key={p} className="px-3 py-1.5 rounded-full bg-white/10 text-xs font-semibold text-white backdrop-blur">{p}</span>)}</div></div></div></Reveal><Reveal delay={100}><span className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-primary mb-4"><span className="h-px w-8 bg-primary"/>{content.credibility_eyebrow}</span><h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-slate-900 leading-[1.1]">{content.credibility_title}</h2><p className="mt-5 text-lg text-slate-600 leading-relaxed">{content.credibility_description}</p><div className="mt-8 flex flex-col sm:flex-row gap-4"><CTAButton to={settings.booking_url || "/contact"} size="lg"><Calendar className="w-5 h-5"/>{content.credibility_primary_cta}</CTAButton><CTAButton to="/contact" variant="secondary" size="lg">{content.credibility_secondary_cta}<ArrowRight className="w-5 h-5"/></CTAButton></div></Reveal></div></div></section>;
-}
+export default function ServicesOverview({ content = HOME_DEFAULTS }) { const [services,setServices]=useState(FALLBACK_SERVICES); useEffect(()=>{(async()=>{try{const data=await base44.entities.Service.list("display_order",20);if(data?.length)setServices(data);}catch(e){}})();},[]); return <section className="py-20 lg:py-28 bg-slate-50/50"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><Reveal><SectionHeader eyebrow={content.services_eyebrow} title={content.services_title} subtitle={content.services_subtitle}/></Reveal><div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">{services.map((service,i)=><Reveal key={service.slug||i} delay={i*60}><ServiceCard service={service}/></Reveal>)}</div><Reveal className="mt-12 text-center"><CTAButton to="/services" variant="dark" size="lg">{content.services_cta}</CTAButton></Reveal></div></section>; }
