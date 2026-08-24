@@ -1,32 +1,21 @@
 import { useEffect, useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { FALLBACK_SERVICES, FALLBACK_INDUSTRIES } from "@/lib/siteData";
 import { Link } from "react-router-dom";
 import { Menu, X, ChevronDown, MessageCircle, Calendar } from "lucide-react";
 import CTAButton from "./CTAButton";
 import { useSiteSettings, trackEvent } from "@/hooks/useSiteSettings";
 
-const SERVICES = [
-  { label: "Google Ads Management", slug: "google-ads-management", icon: "Search" },
-  { label: "Meta Ads", slug: "meta-ads", icon: "Share2" },
-  { label: "E-commerce Growth", slug: "ecommerce-growth", icon: "ShoppingCart" },
-  { label: "Conversion Tracking", slug: "conversion-tracking", icon: "Target" },
-  { label: "GA4 & GTM Setup", slug: "ga4-gtm-setup", icon: "BarChart3" },
-  { label: "Server-Side Tracking", slug: "server-side-tracking", icon: "Server" },
-  { label: "Landing Page Optimization", slug: "landing-page-optimization", icon: "Layout" },
-  { label: "Growth Strategy", slug: "growth-strategy", icon: "TrendingUp" },
-];
-
-const INDUSTRIES = [
-  { label: "Dental", slug: "dental", icon: "Stethoscope" },
-  { label: "Medical", slug: "medical", icon: "HeartPulse" },
-  { label: "Local Services", slug: "local-services", icon: "MapPin" },
-  { label: "E-commerce", slug: "ecommerce", icon: "ShoppingBag" },
-];
+const SERVICES = FALLBACK_SERVICES.map((x) => ({ label: x.title, slug: x.slug, icon: x.icon }));
+const INDUSTRIES = FALLBACK_INDUSTRIES.map((x) => ({ label: x.title, slug: x.slug, icon: x.icon }));
 
 export default function Navbar() {
   const { settings } = useSiteSettings();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [services, setServices] = useState(SERVICES);
+  const [industries, setIndustries] = useState(INDUSTRIES);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -38,6 +27,19 @@ export default function Navbar() {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [serviceRows, industryRows] = await Promise.all([
+          base44.entities.Service.list("display_order", 50),
+          base44.entities.Industry.list("display_order", 50),
+        ]);
+        if (serviceRows?.length) setServices(serviceRows.map((x) => ({ label: x.title, slug: x.slug, icon: x.icon })));
+        if (industryRows?.length) setIndustries(industryRows.map((x) => ({ label: x.title, slug: x.slug, icon: x.icon })));
+      } catch (e) {}
+    })();
+  }, []);
 
   const bookingUrl = settings.booking_url || "#contact";
 
@@ -66,7 +68,7 @@ export default function Navbar() {
               {/* Services dropdown */}
               <DropdownNavItem
                 label="Services"
-                items={SERVICES}
+                items={services}
                 basePath="/services"
                 isOpen={openDropdown === "services"}
                 onEnter={() => setOpenDropdown("services")}
@@ -76,7 +78,7 @@ export default function Navbar() {
               {/* Industries dropdown */}
               <DropdownNavItem
                 label="Industries"
-                items={INDUSTRIES}
+                items={industries}
                 basePath="/industries"
                 isOpen={openDropdown === "industries"}
                 onEnter={() => setOpenDropdown("industries")}
@@ -114,8 +116,8 @@ export default function Navbar() {
         <div className="fixed inset-0 z-40 lg:hidden bg-white pt-20 overflow-y-auto">
           <div className="px-4 py-6 space-y-1">
             <MobileLink to="/about" onClick={() => setMobileOpen(false)}>About</MobileLink>
-            <MobileAccordion label="Services" items={SERVICES} basePath="/services" onNavigate={() => setMobileOpen(false)} />
-            <MobileAccordion label="Industries" items={INDUSTRIES} basePath="/industries" onNavigate={() => setMobileOpen(false)} />
+            <MobileAccordion label="Services" items={services} basePath="/services" onNavigate={() => setMobileOpen(false)} />
+            <MobileAccordion label="Industries" items={industries} basePath="/industries" onNavigate={() => setMobileOpen(false)} />
             <MobileLink to="/case-studies" onClick={() => setMobileOpen(false)}>Case Studies</MobileLink>
             <MobileLink to="/resources" onClick={() => setMobileOpen(false)}>Resources</MobileLink>
             <MobileLink to="/contact" onClick={() => setMobileOpen(false)}>Contact</MobileLink>
