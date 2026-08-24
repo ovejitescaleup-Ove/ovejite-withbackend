@@ -16,7 +16,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   // Post-login destination (e.g. the MCP OAuth consent page sends users here
   // with returnTo so the grant flow can resume). Same-origin paths only.
- const returnTo = safeReturnTo() || "/admin";
+  
+const returnTo = safeReturnTo();
+const loginDestination = returnTo === "/" ? "/admin" : returnTo;
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,7 +26,7 @@ export default function Login() {
     setLoading(true);
     try {
       await base44.auth.loginViaEmailPassword(email, password);
-      window.location.href = returnTo;
+      base44.auth.loginWithProvider("google", loginDestination);
     } catch (err) {
       setError(err.message || "Invalid email or password");
     } finally {
