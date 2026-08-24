@@ -10,7 +10,7 @@ import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import PublicLayout from '@/components/PublicLayout';
 import Login from '@/pages/Login';
-import Register from '@/pages/Register';
+
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import Home from '@/pages/Home';
