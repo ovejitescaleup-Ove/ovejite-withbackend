@@ -47,7 +47,7 @@ export default function AdminLayout() {
     );
   }
 
-  if (user && user.role !== "admin") {
+  if (user && user.app_metadata?.role !== "admin") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center px-4">
         <h1 className="text-2xl font-bold text-slate-900 mb-3">Access Denied</h1>
