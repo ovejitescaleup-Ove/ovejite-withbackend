@@ -1,9 +1,14 @@
 import { Link } from "react-router-dom";
 import { Mail, MessageCircle, Linkedin, Twitter, Instagram, Facebook, ArrowRight } from "lucide-react";
 import { useSiteSettings, buildWhatsAppUrl } from "@/hooks/useSiteSettings";
+import { useEffect, useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { FALLBACK_SERVICES } from "@/lib/siteData";
 
 export default function Footer() {
   const { settings } = useSiteSettings();
+  const [services, setServices] = useState(FALLBACK_SERVICES);
+  useEffect(() => { (async () => { try { const rows = await base44.entities.Service.list("display_order", 5); if (rows?.length) setServices(rows); } catch (e) {} })(); }, []);
 
   const socials = [
     { icon: Linkedin, url: settings.linkedin, label: "LinkedIn" },
@@ -26,7 +31,7 @@ export default function Footer() {
               <span className="text-sm font-semibold text-slate-500">me</span>
             </Link>
             <p className="text-sm leading-relaxed text-slate-400 max-w-xs">
-              Performance marketing specialist helping businesses grow through smarter advertising, accurate tracking, and continuous optimization.
+              {settings.footer_description || "Performance marketing specialist helping businesses grow through smarter advertising, accurate tracking, and continuous optimization."}
             </p>
             <div className="flex gap-3 mt-6">
               {socials.map(({ icon: Icon, url, label }) => (
@@ -61,11 +66,9 @@ export default function Footer() {
           <div>
             <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-5">Services</h4>
             <ul className="space-y-3 text-sm">
-              <FooterLink to="/services/google-ads-management">Google Ads Management</FooterLink>
-              <FooterLink to="/services/meta-ads">Meta Ads</FooterLink>
-              <FooterLink to="/services/conversion-tracking">Conversion Tracking</FooterLink>
-              <FooterLink to="/services/ga4-gtm-setup">GA4 & GTM Setup</FooterLink>
-              <FooterLink to="/services/growth-strategy">Growth Strategy</FooterLink>
+              {services.slice(0, 5).map((service) => (
+                <FooterLink key={service.slug} to={`/services/${service.slug}`}>{service.title}</FooterLink>
+              ))}
             </ul>
           </div>
 
@@ -100,7 +103,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-14 pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-slate-500">© {new Date().getFullYear()} Ovejite.me — All rights reserved.</p>
+          <p className="text-sm text-slate-500">{(settings.copyright_text || "© {year} Ovejite.me — All rights reserved.").replace("{year}", new Date().getFullYear())}</p>
           <div className="flex gap-6 text-sm">
             <Link to="/privacy" className="text-slate-500 hover:text-white transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="text-slate-500 hover:text-white transition-colors">Terms</Link>
