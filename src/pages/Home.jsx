@@ -15,16 +15,27 @@ export default function Home() {
   return (
     <>
       <Hero />
+
       <TrustStrip />
+
       <CredibilityCTA />
+
       <ServicesOverview />
+
       <FeaturedSections />
+
       <PerformanceVisuals />
+
       <IndustriesPreview />
+
       <CaseStudiesPreview />
+
       <Process />
+
       <AboutPreview />
+
       <ResourcesPreview />
+
       <FinalCTA />
     </>
   );
